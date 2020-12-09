@@ -3,30 +3,25 @@
 (defun answer-with-error (socket)
   (pzmq:send socket "ERROR"))
 
-(defun format-ip-address (address)
-  (declare (type (or null (vector (unsigned-byte 8)))))
-  (format nil "~@[~{~d~^.~}~]"
-          (coerce address 'list)))
-
-(defconstant +forward-opcode+ 0
+(defconstant +forward-opcode+ #\!
   "Do forward name resolution")
 
-(defconstant +reverse-opcode+ 1
+(defconstant +reverse-opcode+ #\~
   "Do reverse name resolution")
 
 (defun answer-query (bookkeeper query-socket)
-  (let ((query (pzmq:recv-octets query-socket)))
+  (let ((query (pzmq:recv-string query-socket)))
     (when (< (length query) 1)
       (return-from answer-query
         (answer-with-error query-socket)))
     (let ((opcode (aref query 0)))
       (cond
-      ((= opcode +forward-opcode+)
+      ((char= opcode +forward-opcode+)
        (let ((ip-addr
-              (dns-lookup bookkeeper
-                          (flexi-streams:octets-to-string query :start 1))))
-         (pzmq:send query-socket ip-addr)))
-      ((= opcode +reverse-opcode+)
+              (dns-lookup bookkeeper (subseq query 1))))
+         (pzmq:send query-socket
+                    (if ip-addr (format-ip-address ip-addr)))))
+      ((char= opcode +reverse-opcode+)
        (let ((hostname (reverse-dns-lookup bookkeeper (subseq query 1))))
          (pzmq:send query-socket hostname)))
       (t (answer-with-error query-socket))))))

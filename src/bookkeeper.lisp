@@ -1,5 +1,10 @@
 (in-package :mdns)
 
+(defun format-ip-address (address)
+  (declare (type (vector (unsigned-byte 8))))
+  (format nil "~{~d~^.~}"
+          (coerce address 'list)))
+
 (defstruct dns-entry
   (hostname "" :type string)
   (ip-addr #() :type vector)
@@ -46,13 +51,16 @@
          (bookkeeper-entries bookkeeper))))
 
 (defmethod dns-lookup ((bookkeeper bookkeeper) hostname)
+  (declare (type string hostname))
   (let ((entry (find hostname (bookkeeper-entries bookkeeper)
                      :test #'string=
                      :key  #'dns-entry-hostname)))
     (if entry (dns-entry-ip-addr entry))))
 
 (defmethod reverse-dns-lookup ((bookkeeper bookkeeper) addr)
+  (declare (type string addr))
   (let ((entry (find addr (bookkeeper-entries bookkeeper)
                      :test #'equalp
-                     :key  #'dns-entry-ip-addr)))
+                     :key  (alexandria:compose #'format-ip-address
+                                               #'dns-entry-ip-addr))))
     (if entry (dns-entry-hostname entry))))

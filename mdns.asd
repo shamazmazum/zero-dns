@@ -5,6 +5,7 @@
   :license "2-clause BSD"
   :version "0.1"
   :depends-on (:flexi-streams
+               :alexandria
                :nibbles
                :ip-interfaces
                :pzmq
