@@ -13,7 +13,9 @@
 . /etc/rc.subr
 
 name="zerodns"
+desc="ZeroDNS daemon"
 rcvar=zerodns_enable
+required_modules="pty"
 
 load_rc_config ${name}
 
