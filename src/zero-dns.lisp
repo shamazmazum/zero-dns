@@ -1,6 +1,6 @@
-(in-package :mdns)
+(in-package :zero-dns)
 
-(defun mdns (iface)
+(defun zero-dns (iface)
   (pzmq:with-context (ctx :max-sockets 32)
     (pzmq:with-socket control-socket :pub
       (pzmq:bind control-socket "inproc://control")

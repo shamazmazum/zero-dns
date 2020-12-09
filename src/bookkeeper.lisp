@@ -1,4 +1,4 @@
-(in-package :mdns)
+(in-package :zero-dns)
 
 (defun format-ip-address (address)
   (declare (type (vector (unsigned-byte 8))))

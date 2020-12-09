@@ -1,4 +1,4 @@
-(in-package :mdns)
+(in-package :zero-dns)
 
 (defun start-receiver (zmq-context iface)
   (flet ((receiver-fun ()
@@ -8,7 +8,7 @@
                                  (bookkeeper-socket :pair))
                (pzmq:bind multicast-socket
                           (format nil "norm://~a;239.192.20.1:~d"
-                                  iface *mdns-port*))
+                                  iface *zdns-port*))
                (pzmq:connect control-socket "inproc://control")
                (pzmq:connect bookkeeper-socket "inproc://bookkeeper")
                (pzmq:with-poll-items items (control-socket multicast-socket)
@@ -19,12 +19,12 @@
                       (let ((msg (pzmq:recv-string control-socket)))
                         (if (string= msg "quit")
                             (return nil))))
-                    ;; Received mDNS message
+                    ;; Received Zero DNS message
                     (when (member :pollin (pzmq:revents items 1))
                       (let ((msg (pzmq:recv-octets multicast-socket)))
                         (handler-case
                             (multiple-value-bind (hostname ip-addr)
-                                (parse-mdns-message msg)
+                                (parse-zdns-message msg)
                               (pzmq:send bookkeeper-socket
                                          (flexi-streams:with-output-to-sequence (output)
                                            (cl-store:store
@@ -32,7 +32,7 @@
                                                             :ip-addr ip-addr
                                                             :time (get-universal-time))
                                             output))))
-                          (mdns-error ()
-                            (format t "Invalid mDNS message~%")))
+                          (zdns-error ()
+                            (format t "Invalid Zero DNS message~%")))
                         (force-output)))))))))
     (make-thread #'receiver-fun :name "Receiver thread")))

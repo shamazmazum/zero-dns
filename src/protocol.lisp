@@ -1,4 +1,4 @@
-(in-package :mdns)
+(in-package :zero-dns)
 
 (defconstant +proto-version+ 0)
 (defconstant +header+ #x62444e53
@@ -9,7 +9,7 @@
                     :key #'ip-interface-name
                     :test #'string=)))
     (if (not info)
-        (error 'mdns-error
+        (error 'zdns-error
                :format-control "No such interface: ~s"
                :format-arguments (list iface-name)))
     info))
@@ -18,7 +18,7 @@
   ;; Works on SBCL
   (machine-instance))
 
-(defun format-mdns-message (hostname ip-addr)
+(defun format-zdns-message (hostname ip-addr)
   (flexi-streams:with-output-to-sequence (out)
     (write-ub32/be +header+ out)
     (write-byte +proto-version+ out)
@@ -28,14 +28,14 @@
     (write-byte 0 out)
     (write-sequence ip-addr out)))
 
-(defun parse-mdns-message (octets)
+(defun parse-zdns-message (octets)
   (flexi-streams:with-input-from-sequence (input octets)
     (if (/= (read-ub32/be input) +header+)
-        (error 'mdns-error
-               :format-control "Not a mDNS message"))
+        (error 'zdns-error
+               :format-control "Not a zero-dns message"))
     (let ((version (read-byte input)))
       (if (/= version +proto-version+)
-          (error 'mdns-error
+          (error 'zdns-error
                  :format-control "Unknown proto version: ~d"
                  :format-arguments (list version))))
     (values
@@ -46,6 +46,6 @@
          collect byte))
      (let ((ip-addr (make-array 4 :element-type '(unsigned-byte 8))))
        (if (/= (read-sequence ip-addr input) 4)
-           (error 'mdns-error
+           (error 'zdns-error
                   :format-control "Message is too short"))
        ip-addr))))

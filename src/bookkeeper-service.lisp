@@ -1,4 +1,4 @@
-(in-package :mdns)
+(in-package :zero-dns)
 
 (defun answer-with-error (socket)
   (pzmq:send socket "ERROR"))
@@ -48,7 +48,7 @@
                       (let ((msg (pzmq:recv-string control-socket)))
                         (if (string= msg "quit")
                             (return nil))))
-                    ;; New mDNS entry
+                    ;; New Zero DNS entry
                     (when (member :pollin (pzmq:revents items 1))
                       (flexi-streams:with-input-from-sequence
                           (input (pzmq:recv-octets bookkeeper-socket))

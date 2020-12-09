@@ -1,8 +1,6 @@
-(defpackage mdns
+(defpackage zero-dns
   (:use #:cl
         #:nibbles
         #:ip-interfaces
         #:bordeaux-threads)
-  (:export #:mdns
-           #:tell-ip-addr
-           #:tell-hostname))
+  (:export #:zero-dns))

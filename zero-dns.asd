@@ -1,6 +1,6 @@
-(defsystem :mdns
-  :name :mdns
-  :description "mDNS service"
+(defsystem :zero-dns
+  :name :zero-dns
+  :description "Simple DNS service on top of ZeroMQ"
   :author "Vasily Postnicov <shamaz.mazum@gmail.com>"
   :license "2-clause BSD"
   :version "0.1"
@@ -20,4 +20,4 @@
                (:file "bookkeeper-service")
                (:file "sender")
                (:file "receiver")
-               (:file "mdns")))
+               (:file "zero-dns")))

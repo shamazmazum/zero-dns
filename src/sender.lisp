@@ -1,4 +1,4 @@
-(in-package :mdns)
+(in-package :zero-dns)
 
 (defun start-sender (zmq-context iface)
   (let ((ip-addr (ip-interface-address
@@ -11,7 +11,7 @@
                                    (control-socket   :sub))
                  (pzmq:connect multicast-socket
                                (format nil "norm://~a;239.192.20.1:~d"
-                                       iface *mdns-port*))
+                                       iface *zdns-port*))
                  (pzmq:connect control-socket "inproc://control")
                  (loop
                     ;; Check messages from control
@@ -27,6 +27,6 @@
                              (+ time *sending-interval*))
                       (setq time (get-universal-time))
                       (pzmq:send multicast-socket
-                                 (format-mdns-message hostname ip-addr))))))))
+                                 (format-zdns-message hostname ip-addr))))))))
       (make-thread #'sender-fun
                    :name "Sender thread"))))
