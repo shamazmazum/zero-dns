@@ -7,8 +7,8 @@
                                  (control-socket    :sub)
                                  (bookkeeper-socket :pair))
                (pzmq:bind multicast-socket
-                          (format nil "norm://~a;239.192.20.1:~d"
-                                  iface *zdns-port*))
+                          (format nil "norm://~a;~a:~d"
+                                  iface *multicast-address* *zdns-port*))
                (pzmq:connect control-socket "inproc://control")
                (pzmq:connect bookkeeper-socket "inproc://bookkeeper")
                (pzmq:with-poll-items items (control-socket multicast-socket)
