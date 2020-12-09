@@ -2,8 +2,10 @@
   (:use #:cl
         #:nibbles
         #:ip-interfaces
-        #:bordeaux-threads)
+        #:bordeaux-threads
+        #:cl-daemonize)
   (:export #:zero-dns
+           #:main
            ;; Parameters
            #:*sending-interval*
            #:*time-to-live*

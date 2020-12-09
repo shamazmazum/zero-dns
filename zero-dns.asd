@@ -10,6 +10,7 @@
                :ip-interfaces
                :pzmq
                :cl-store
+               :cl-daemonize
                :bordeaux-threads)
   :pathname "src/"
   :serial t
@@ -21,3 +22,9 @@
                (:file "sender")
                (:file "receiver")
                (:file "zero-dns")))
+
+(defsystem :zero-dns/executable
+  :build-operation program-op
+  :build-pathname "zero-dns"
+  :entry-point "zero-dns:main"
+  :depends-on (:zero-dns))
