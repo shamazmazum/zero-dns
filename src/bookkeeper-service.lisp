@@ -38,9 +38,9 @@
                (pzmq:bind bookkeeper-socket "inproc://bookkeeper")
                (pzmq:bind query-socket (format nil "tcp://*:~d"
                                                *query-port*))
-               (pzmq:with-poll-items items (control-socket
-                                            bookkeeper-socket
-                                            query-socket)
+               (pzmq:with-poll-items items ((control-socket    :pollin)
+                                            (bookkeeper-socket :pollin)
+                                            (query-socket      :pollin))
                  (loop
                     (pzmq:poll items 1000)
                     ;; Check messages from control

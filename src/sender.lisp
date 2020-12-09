@@ -15,7 +15,7 @@
                  (pzmq:connect control-socket "inproc://control")
                  (loop
                     ;; Check messages from control
-                    (pzmq:with-poll-items items (control-socket)
+                    (pzmq:with-poll-items items ((control-socket :pollin))
                       (pzmq:poll items 500)
                       (when (member :pollin (pzmq:revents items 0))
                         (let ((msg (pzmq:recv-string control-socket)))

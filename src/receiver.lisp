@@ -11,7 +11,8 @@
                                   iface *multicast-address* *zdns-port*))
                (pzmq:connect control-socket "inproc://control")
                (pzmq:connect bookkeeper-socket "inproc://bookkeeper")
-               (pzmq:with-poll-items items (control-socket multicast-socket)
+               (pzmq:with-poll-items items ((control-socket   :pollin)
+                                            (multicast-socket :pollin))
                  (loop
                     (pzmq:poll items)
                     ;; Check messages from control
