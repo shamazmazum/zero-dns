@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# PROVIDE: zerodns
+# REQUIRE: DAEMON NETWORKING FILESYSTEMS
+# BEFORE: LOGIN
+# KEYWORD: shutdown
+#
+# Add the following line to /etc/rc.conf to enable zerodns:
+#
+# zerodns_enable="YES"
+#
+
+. /etc/rc.subr
+
+name="zerodns"
+rcvar=zerodns_enable
+
+load_rc_config ${name}
+
+: ${zerodns_enable="NO"}
+: ${zerodns_user="zerodns"}
+: ${zerodns_group="zerodns"}
+
+command="/usr/local/bin/zero-dns"
+command_args="${zerodns_iface}"
+
+run_rc_command "$1"
