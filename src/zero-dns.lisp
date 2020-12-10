@@ -1,14 +1,5 @@
 (in-package :zero-dns)
 
-(defun loop-forever (interrupt-handler)
-  (cond
-    (interrupt-handler
-     (handler-case
-         (loop (sleep 10))
-       (sb-sys:interactive-interrupt ()
-         (funcall interrupt-handler))))
-    (t (loop (sleep 10)))))
-
 (defun zero-dns (iface &optional daemonized)
   (pzmq:with-context (ctx :max-sockets 32)
     (pzmq:with-socket control-socket :pub
@@ -27,11 +18,13 @@
           (when daemonized
             (sb-sys:enable-interrupt sb-posix:sigterm #'stop-fn)
             (sb-sys:enable-interrupt sb-posix:sigint  #'stop-fn))
-
-          (loop-forever
-             (if (not daemonized)
-                 (lambda ()
-                   (stop-fn nil nil nil)))))))))
+          ;; SB-SYS:INTERACTIVE-INTERRUPT can be signalled only when
+          ;; we are not daemonized. Just call the same function,
+          ;; STOP-FN, to do cleanup.
+          (handler-case
+              (loop (sleep 10))
+            (sb-sys:interactive-interrupt ()
+              (stop-fn nil nil nil))))))))
 
 (defun main ()
   (when (/= (length sb-ext:*posix-argv*) 2)
