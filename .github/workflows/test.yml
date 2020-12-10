@@ -1,0 +1,22 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      LISP: sbcl
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get install info install-info libzmq3-dev
+      - name: Install CIM
+        run: |
+          curl -L https://raw.githubusercontent.com/shamazmazum/cl-cirrus/github-actions/install-actions.sh | sh
+          cl -e '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)'
+      - name: Build ZeroDNS
+        run: |
+          cl -l zero-dns -e '(uiop:quit 0)'

@@ -1,4 +1,5 @@
 # ZeroDNS daemon
+![CI](https://github.com/shamazmazum/zero-dns/workflows/CI/badge.svg)
 
 This is ZeroDNS daemon which provides DNS functionality on top of ZeroMQ library
 and NORM multicast protocol. Tested on FreeBSD only, but may work on Linux as
