@@ -1,6 +1,32 @@
 (in-package :zero-dns)
 
-(defun zero-dns (iface &optional daemonized)
+(defun ensure-socket-accessible (&key quit-on-error)
+  (let ((directory (make-pathname
+                    :directory (pathname-directory *query-socket*))))
+  (flet ((rant-and-exit (c)
+           (princ c *error-output*)
+           (terpri *error-output*)
+           (format *error-output*
+                   "Socket ~a is not accessible, check permissions~%"
+                   *query-socket*)
+           (if quit-on-error
+               (uiop:quit 1)
+               (abort))))
+    (handler-bind
+        ((sb-int::file-error #'rant-and-exit))
+      (ensure-directories-exist directory)
+      (if (probe-file *query-socket*)
+          (delete-file *query-socket*))
+      (let ((stream (open *query-socket*
+                          :direction :io
+                          :if-does-not-exist :create
+                          :if-exists :supersede)))
+        (close stream))))))
+
+(defun zero-dns (iface &key daemonize)
+  (ensure-socket-accessible :quit-on-error daemonize)
+  (when daemonize
+    (daemonize))
   (pzmq:with-context (ctx :max-sockets 32)
     (pzmq:with-socket control-socket :pub
       (pzmq:bind control-socket "inproc://control")
@@ -14,8 +40,8 @@
                  (declare (ignore signal info ctx))
                  (pzmq:send control-socket "quit")
                  (map nil #'join-thread threads)
-                 (if daemonized (uiop:quit))))
-          (when daemonized
+                 (if daemonize (uiop:quit))))
+          (when daemonize
             (sb-sys:enable-interrupt sb-posix:sigterm #'stop-fn)
             (sb-sys:enable-interrupt sb-posix:sigint  #'stop-fn))
           ;; SB-SYS:INTERACTIVE-INTERRUPT can be signalled only when
@@ -28,7 +54,6 @@
 
 (defun main ()
   (when (/= (length sb-ext:*posix-argv*) 2)
-    (format t "Usage: zero-dns <iface>~%")
+    (format *error-output* "Usage: zero-dns <iface>~%")
     (uiop:quit 1))
-  (daemonize)
-  (zero-dns (second sb-ext:*posix-argv*) t))
+  (zero-dns (second sb-ext:*posix-argv*) :daemonize t))

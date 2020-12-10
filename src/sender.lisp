@@ -10,8 +10,8 @@
                (pzmq:with-sockets ((multicast-socket :pub)
                                    (control-socket   :sub))
                  (pzmq:connect multicast-socket
-                               (format nil "norm://~a;~a:~d"
-                                       iface *multicast-address* *zdns-port*))
+                               (format nil "norm://~a;~a"
+                                       iface *multicast-address*))
                  (pzmq:connect control-socket "inproc://control")
                  (loop
                     ;; Check messages from control

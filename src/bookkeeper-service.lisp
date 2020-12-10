@@ -36,8 +36,8 @@
                                  (query-socket      :rep))
                (pzmq:connect control-socket "inproc://control")
                (pzmq:bind bookkeeper-socket "inproc://bookkeeper")
-               (pzmq:bind query-socket (format nil "tcp://*:~d"
-                                               *query-port*))
+               (pzmq:bind query-socket (format nil "ipc://~a"
+                                               (namestring (truename *query-socket*))))
                (pzmq:with-poll-items items ((control-socket    :pollin)
                                             (bookkeeper-socket :pollin)
                                             (query-socket      :pollin))

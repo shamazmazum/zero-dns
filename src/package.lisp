@@ -10,5 +10,4 @@
            #:*sending-interval*
            #:*time-to-live*
            #:*multicast-address*
-           #:*zdns-port*
-           #:*query-port*))
+           #:*query-socket*))
