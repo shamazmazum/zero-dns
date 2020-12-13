@@ -11,7 +11,9 @@
                :pzmq
                :cl-store
                :cl-daemonize
-               :bordeaux-threads)
+               :bordeaux-threads
+               :unix-opts
+               :esrap)
   :pathname "src/"
   :serial t
   :components ((:file "package")
@@ -21,7 +23,8 @@
                (:file "bookkeeper-service")
                (:file "sender")
                (:file "receiver")
-               (:file "zero-dns")))
+               (:file "zero-dns")
+               (:file "standalone")))
 
 (defsystem :zero-dns/executable
   :build-operation program-op

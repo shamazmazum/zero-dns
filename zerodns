@@ -24,6 +24,6 @@ load_rc_config ${name}
 : ${zerodns_group="zerodns"}
 
 command="/usr/local/bin/zero-dns"
-command_args="${zerodns_iface}"
+command_args="-d ${zerodns_iface}"
 
 run_rc_command "$1"

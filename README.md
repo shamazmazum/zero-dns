@@ -7,6 +7,8 @@ well.
 
 ## How to use it?
 
+Quick start:
+
 * Install ZeroMQ.
 * Clone this repository into `local-projects`.
 * Run `(ql:quickload :zero-dns)` in REPL.
@@ -17,9 +19,9 @@ well.
 * DNS queries will be accepted on `/var/run/zero-dns/zero-dns.sock` UNIX domain
   socket by default. Make sure that `/var/run/zero-dns/` exists and is
   accessible before starting `zero-dns`.
-* Run `zero-dns` supplying the interface which is connected to your LAN,
-  e.g. `zero-dns re0`. The process will daemonize itself and can be killed with
-  `SIGTERM` or `SIGINT`.
+* Run `zero-dns -d` supplying the interface which is connected to your LAN,
+  e.g. `zero-dns -d re0`. The process will daemonize itself and can be killed
+  with `SIGTERM` or `SIGINT`.
 
 An example of name resolution query using `py-zmq`:
 
@@ -38,6 +40,19 @@ b'vonbraun.local'
 
 `!` is used for forward DNS lookup and `~` for reverse DNS lookup. Currently,
 only IPv4 is supported.
+
+`zero-dns` executable supports the following options:
+
+* `-a, --address ADDRESS` Multicast address and port for Zero DNS
+  messages. Default value: `239.192.20.1:5354`
+* `-i, --sending-interval SECONDS` Interval between two ZeroDNS messages in
+  seconds. Default value: `30`
+* `-t, --time-to-live SECONDS` Time before ZeroDNS entry expiration in
+  seconds. Default: `120`
+* `-s, --query-socket SOCKET` Path to UNIX domain socket for DNS
+  queries. Default value: `/var/run/zero-dns/zero-dns.sock`
+* `-d, --daemonize` Run as a daemon.
+* `-h, --help` Print help and exit.
 
 ## Startup script for FreeBSD
 
