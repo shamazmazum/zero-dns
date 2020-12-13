@@ -1,9 +1,12 @@
 (in-package :zero-dns)
 
 (defun ensure-socket-accessible (&key quit-on-error)
+  ;; KLUDGE: try to create regular file with name *QUERY-SOCKET*
+  ;; If we are not successful print a message and optionally quit.
+  ;; Created regular file will be overwritten by ZeroMQ.
   (let ((directory (make-pathname
                     :directory (pathname-directory *query-socket*))))
-  (flet ((rant-and-exit (c)
+  (flet ((print-error-and-maybe-quit (c)
            (princ c *error-output*)
            (terpri *error-output*)
            (format *error-output*
@@ -13,7 +16,7 @@
                (uiop:quit 1)
                (abort))))
     (handler-bind
-        ((sb-int::file-error #'rant-and-exit))
+        ((sb-int::file-error #'print-error-and-maybe-quit))
       (ensure-directories-exist directory)
       (if (probe-file *query-socket*)
           (delete-file *query-socket*))
@@ -24,6 +27,8 @@
         (close stream))))))
 
 (defun zero-dns (iface &key daemonize)
+  "Start ZeroDNS service.on interface IFACE. If DAEMONIZE is T run
+service as a daemon."
   (ensure-socket-accessible :quit-on-error daemonize)
   (when daemonize
     (daemonize))
@@ -53,6 +58,7 @@
               (stop-fn nil nil nil))))))))
 
 (defun main ()
+  ;; Toplevel entry point
   (when (/= (length sb-ext:*posix-argv*) 2)
     (format *error-output* "Usage: zero-dns <iface>~%")
     (uiop:quit 1))
