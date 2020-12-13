@@ -33,7 +33,7 @@
                                                             :ip-addr ip-addr
                                                             :time (get-universal-time))
                                             output))))
-                          (zdns-error ()
+                          ((or zdns-error end-of-file) ()
                             (format t "Invalid Zero DNS message~%")))
                         (force-output)))))))))
     (make-thread #'receiver-fun :name "Receiver thread")))
