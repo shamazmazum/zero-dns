@@ -25,7 +25,7 @@ daemonize the process."
       (pzmq:bind control-socket "inproc://control")
       (let ((threads
              (flet ((start-service (start-function)
-                      (funcall start-function pzmq:*default-context* iface)))
+                      (funcall start-function iface)))
                (mapcar #'start-service (list #'start-bookkeeper
                                              #'start-sender
                                              #'start-receiver)))))

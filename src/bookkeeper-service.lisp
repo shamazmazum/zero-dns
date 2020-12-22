@@ -26,11 +26,10 @@
          (pzmq:send query-socket hostname)))
       (t (answer-with-error query-socket))))))
 
-(defun start-bookkeeper (zmq-context iface)
+(defun start-bookkeeper (iface)
   (declare (ignore iface))
   (flet ((bookkeeper-fun ()
-           (let ((pzmq:*default-context* zmq-context)
-                 (bookkeeper (make-instance 'bookkeeper)))
+           (let ((bookkeeper (make-instance 'bookkeeper)))
              (pzmq:with-sockets ((control-socket    :sub)
                                  (bookkeeper-socket :pair)
                                  (query-socket      :rep))
@@ -60,6 +59,10 @@
                     ;; Prune old entries
                     (prune-entries bookkeeper)))))))
     (prog1
-        (make-thread #'bookkeeper-fun :name "Bookkeeper thread")
+        (make-thread #'bookkeeper-fun
+                     :name "Bookkeeper thread"
+                     :initial-bindings (acons 'pzmq:*default-context*
+                                              pzmq:*default-context*
+                                              *default-special-bindings*))
       ;; Wait for bookkeeper thread to start
       (sleep 1))))

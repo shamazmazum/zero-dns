@@ -1,12 +1,11 @@
 (in-package :zero-dns)
 
-(defun start-sender (zmq-context iface)
+(defun start-sender (iface)
   (let ((ip-addr (ip-interface-address
                   (get-iface-info iface)))
         (hostname (gethostname)))
     (flet ((sender-fun ()
-             (let ((time (get-universal-time))
-                   (pzmq:*default-context* zmq-context))
+             (let ((time (get-universal-time)))
                (pzmq:with-sockets ((multicast-socket :pub)
                                    (control-socket   :sub))
                  (pzmq:connect multicast-socket
@@ -29,4 +28,7 @@
                       (pzmq:send multicast-socket
                                  (format-zdns-message hostname ip-addr))))))))
       (make-thread #'sender-fun
-                   :name "Sender thread"))))
+                   :name "Sender thread"
+                   :initial-bindings (acons 'pzmq:*default-context*
+                                            pzmq:*default-context*
+                                            *default-special-bindings*)))))
