@@ -18,10 +18,7 @@
   "Start ZeroDNS service.on interface IFACE. If DAEMONIZE is T
 daemonize the process."
   (ensure-socket-accessible)
-  (when (not (get-running-iface iface))
-    (error 'zdns-error
-           :format-control "Interface does not exist or is stopped: ~a"
-           :format-arguments (list iface)))
+  (check-iface-running iface)
   (when daemonize
     (daemonize))
   (pzmq:with-context (ctx :max-sockets 32)
@@ -50,9 +47,6 @@ daemonize the process."
                  while (some #'thread-alive-p threads)
                  do
                    (sleep 1)
-                   (when (not (get-running-iface iface))
-                     (format *standard-output*
-                             "Interface ~a is down~%" iface)
-                     (stop)))
-            (sb-sys:interactive-interrupt ()
+                   (check-iface-running iface))
+            ((or sb-sys:interactive-interrupt zdns-iface-down) ()
               (stop))))))))

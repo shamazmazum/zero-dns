@@ -15,5 +15,17 @@
 (define-condition zdns-condition ()
   ())
 
-(define-condition zdns-error (zdns-condition simple-error)
+(define-condition zdns-error (error zdns-condition)
+  ()
+  (:documentation "General ZeroDNS error"))
+
+(define-condition zdns-simple-error (zdns-error simple-error)
   ())
+
+(define-condition zdns-iface-down (zdns-error)
+  ((iface :reader  iface-down-iface
+          :initarg :iface))
+  (:documentation "Interface is down or non-existent")
+  (:report (lambda (c s)
+             (format s "Interface ~a is down"
+                     (iface-down-iface c)))))

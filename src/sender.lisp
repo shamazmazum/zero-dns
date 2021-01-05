@@ -19,12 +19,11 @@
                             (return nil)))))
                   ;; Send multicast message which contains our
                   ;; hostname and IP address if needed.
-                  ;; If the interface is down, do nothing (quit
-                  ;; signal will arrive soon).
-                  (let ((iface (get-running-iface iface)))
-                    (when (and iface
-                               (> (get-universal-time)
-                                  (+ time *sending-interval*)))
+                  ;; If the interface is down, an error is signaled
+                  ;; and the thread goes down (this is OK).
+                  (let ((iface (check-iface-running iface)))
+                    (when (> (get-universal-time)
+                             (+ time *sending-interval*))
                       (setq time (get-universal-time))
                       (pzmq:send multicast-socket
                                  (format-zdns-message

@@ -92,11 +92,11 @@
       (if help (describe-and-quit))
 
       (if (/= (length arguments) 1)
-          (error 'zdns-error
+          (error 'zdns-simple-error
                  :format-control "You must specify a network interface for ZeroDNS to run on."))
 
       (if (not (ip-addr-and-port-p multicast-address))
-          (error 'zdns-error
+          (error 'zdns-simple-error
                  :format-control "Not valid address and port: ~a"
                  :format-arguments (list multicast-address)))
 

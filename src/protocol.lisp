@@ -4,15 +4,17 @@
 (defconstant +header+ #x62444e53
   "String 'bDNS'")
 
-(defun get-running-iface (iface-name)
-  "Return interface if it exists and is running, otherwise return NIL."
+(defun check-iface-running (iface-name)
+  "Return interface if it exists and is running, signal an error"
   (let ((iface (find iface-name (get-ip-interfaces)
                      :key #'ip-interface-name
                      :test #'string=)))
-    (when (and iface
-               ;; RUNNING flag is 1 on most platforms
-               (oddp (ip-interface-flags iface)))
-      iface)))
+    (when (or (not iface)
+              ;; RUNNING flag is 1 on most platforms
+              (evenp (ip-interface-flags iface)))
+      (error 'zdns-iface-down
+             :iface iface-name))
+    iface))
 
 (defun gethostname ()
   ;; Works on SBCL
@@ -31,11 +33,11 @@
 (defun parse-zdns-message (octets)
   (flexi-streams:with-input-from-sequence (input octets)
     (if (/= (read-ub32/be input) +header+)
-        (error 'zdns-error
+        (error 'zdns-simple-error
                :format-control "Not a zero-dns message"))
     (let ((version (read-byte input)))
       (if (/= version +proto-version+)
-          (error 'zdns-error
+          (error 'zdns-simple-error
                  :format-control "Unknown proto version: ~d"
                  :format-arguments (list version))))
     (values
@@ -46,6 +48,6 @@
          collect byte))
      (let ((ip-addr (make-array 4 :element-type '(unsigned-byte 8))))
        (if (/= (read-sequence ip-addr input) 4)
-           (error 'zdns-error
+           (error 'zdns-simple-error
                   :format-control "Message is too short"))
        ip-addr))))
