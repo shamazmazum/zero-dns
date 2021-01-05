@@ -18,6 +18,10 @@
   "Start ZeroDNS service.on interface IFACE. If DAEMONIZE is T
 daemonize the process."
   (ensure-socket-accessible)
+  (if (not (get-running-iface iface))
+      (error 'zdns-error
+             :format-control "Interface does not exist or is stopped: ~a"
+             :format-arguments (list iface)))
   (when daemonize
     (daemonize))
   (pzmq:with-context (ctx :max-sockets 32)

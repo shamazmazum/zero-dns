@@ -74,7 +74,8 @@
   (when condition
     (princ condition *error-output*)
     (terpri *error-output*))
-  (opts:describe :usage-of "zero-dns" :args "iface")
+  (when (typep condition 'opts:troublesome-option)
+    (opts:describe :usage-of "zero-dns" :args "iface"))
   (uiop:quit (if condition 1 0)))
 
 (defun parse-arguments-or-signal ()
@@ -110,9 +111,7 @@
 (defun main ()
   (handler-bind
       (((or zdns-error
-            opts:missing-arg
-            opts:arg-parser-failed
-            opts:unknown-option
+            opts:troublesome-option
             sb-int::file-error)
         #'describe-and-quit))
     (multiple-value-bind (interface daemonize)

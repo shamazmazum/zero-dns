@@ -2,7 +2,7 @@
 
 (defun start-sender (iface)
   (let ((ip-addr (ip-interface-address
-                  (get-iface-info iface)))
+                  (get-running-iface iface)))
         (hostname (gethostname)))
     (flet ((sender-fun ()
              (let ((time (get-universal-time)))

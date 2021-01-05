@@ -4,15 +4,15 @@
 (defconstant +header+ #x62444e53
   "String 'bDNS'")
 
-(defun get-iface-info (iface-name)
-  (let ((info (find iface-name (get-ip-interfaces)
-                    :key #'ip-interface-name
-                    :test #'string=)))
-    (if (not info)
-        (error 'zdns-error
-               :format-control "No such interface: ~s"
-               :format-arguments (list iface-name)))
-    info))
+(defun get-running-iface (iface-name)
+  "Return interface if it exists and is running, otherwise return NIL."
+  (let ((iface (find iface-name (get-ip-interfaces)
+                     :key #'ip-interface-name
+                     :test #'string=)))
+    (when (and iface
+               ;; RUNNING flag is 1 on most platforms
+               (oddp (ip-interface-flags iface)))
+      iface)))
 
 (defun gethostname ()
   ;; Works on SBCL
