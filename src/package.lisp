@@ -10,4 +10,4 @@
            #:*sending-interval*
            #:*time-to-live*
            #:*multicast-address*
-           #:*query-socket*))
+           #:*socket-directory*))

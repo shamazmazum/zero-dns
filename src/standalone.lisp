@@ -54,12 +54,12 @@
    :long        "time-to-live"
    :arg-parser  #'parse-integer
    :meta-var    "SECONDS")
-  (:name        :query-socket
-   :description (documentation-with-default *query-socket*)
-   :short       #\s
-   :long        "query-socket"
+  (:name        :socket-directory
+   :description (documentation-with-default *socket-directory*)
+   :short       #\q
+   :long        "socket-directory"
    :arg-parser  #'identity
-   :meta-var    "SOCKET")
+   :meta-var    "DIRECTORY")
   (:name        :daemonize
    :description "Run as a daemon"
    :short       #\d
@@ -69,12 +69,13 @@
    :short       #\h
    :long        "help"))
 
-(defun describe-and-quit (&optional condition)
+(defun describe-and-quit (&key condition force-describe)
   "Print usage and quit."
   (when condition
     (princ condition *error-output*)
     (terpri *error-output*))
-  (when (typep condition 'opts:troublesome-option)
+  (when (or (typep condition 'opts:troublesome-option)
+            force-describe)
     (opts:describe :usage-of "zero-dns" :args "iface"))
   (uiop:quit (if condition 1 0)))
 
@@ -85,11 +86,11 @@
     (let ((sending-interval  (getf options :sending-interval *sending-interval*))
           (time-to-live      (getf options :time-to-live     *time-to-live*))
           (multicast-address (getf options :address          *multicast-address*))
-          (query-socket      (getf options :query-socket     *query-socket*))
+          (socket-directory  (getf options :socket-directory *socket-directory*))
           (help              (getf options :help))
           (daemonize         (getf options :daemonize)))
 
-      (if help (describe-and-quit))
+      (if help (describe-and-quit :force-describe t))
 
       (if (/= (length arguments) 1)
           (error 'zdns-simple-error
@@ -103,7 +104,7 @@
       (setq *sending-interval*  sending-interval
             *time-to-live*      time-to-live
             *multicast-address* multicast-address
-            *query-socket*      query-socket)
+            *socket-directory*  socket-directory)
       (values
        (first arguments)
        daemonize))))
@@ -113,7 +114,7 @@
       (((or zdns-error
             opts:troublesome-option
             sb-int::file-error)
-        #'describe-and-quit))
+         (lambda (c) (describe-and-quit :condition c))))
     (multiple-value-bind (interface daemonize)
         (parse-arguments-or-signal)
       (zero-dns interface :daemonize daemonize)

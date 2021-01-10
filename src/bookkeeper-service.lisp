@@ -27,7 +27,6 @@
       (t (answer-with-error query-socket))))))
 
 (defun start-bookkeeper (iface)
-  (declare (ignore iface))
   (flet ((bookkeeper-fun ()
            (let ((bookkeeper (make-instance 'bookkeeper)))
              (pzmq:with-sockets ((control-socket    :sub)
@@ -36,7 +35,10 @@
                (pzmq:connect control-socket "inproc://control")
                (pzmq:bind bookkeeper-socket "inproc://bookkeeper")
                (pzmq:bind query-socket (format nil "ipc://~a"
-                                               (namestring (truename *query-socket*))))
+                                               (namestring
+                                                (merge-pathnames
+                                                 (pathname iface)
+                                                 (truename *socket-directory*)))))
                (pzmq:with-poll-items items ((control-socket    :pollin)
                                             (bookkeeper-socket :pollin)
                                             (query-socket      :pollin))

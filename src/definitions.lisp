@@ -9,8 +9,9 @@
 (defparameter *multicast-address* "239.192.20.1:5354"
   "Multicast address and port for Zero DNS messages.")
 
-(defparameter *query-socket* #p"/var/run/zero-dns/zero-dns.sock"
-  "Pathname to UNIX domain socket for DNS queries.")
+(defparameter *socket-directory* #p"/var/run/zero-dns/"
+  "Directory where ZeroDNS will create UNIX domain sockets for DNS
+queries.")
 
 (define-condition zdns-condition ()
   ())

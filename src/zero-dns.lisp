@@ -1,23 +1,21 @@
 (in-package :zero-dns)
 
-(defun ensure-socket-accessible ()
-  ;; KLUDGE: try to create regular file with name *QUERY-SOCKET*
-  ;; Created regular file will be overwritten by ZeroMQ.
-  (let ((directory (make-pathname
-                    :directory (pathname-directory *query-socket*))))
-    (ensure-directories-exist directory)
-    (if (probe-file *query-socket*)
-        (delete-file *query-socket*))
-    (let ((stream (open *query-socket*
+(defun check-socket-directory ()
+  "Check that the socket directory is assessible for writing"
+  (let ((tmpname (merge-pathnames
+                  #p"tmp"
+                  (truename *socket-directory*))))
+    (let ((stream (open tmpname
                         :direction :io
                         :if-does-not-exist :create
                         :if-exists :supersede)))
-        (close stream))))
+      (close stream))
+    (delete-file tmpname)))
 
 (defun zero-dns (iface &key daemonize)
   "Start ZeroDNS service.on interface IFACE. If DAEMONIZE is T
 daemonize the process."
-  (ensure-socket-accessible)
+  (check-socket-directory)
   (check-iface-running iface)
   (when daemonize
     (daemonize))
