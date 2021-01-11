@@ -1,1 +1,14 @@
-This is configuration files for FreeBSD OS.
+This is configuration files for FreeBSD OS. You have two options:
+
+1) Copy rc.d/zerodns to /usr/local/etc/rc.d and devd/zerodns.conf to
+/etc/devd and restart devd: service devd restart. With this option
+ZeroDNS daemon is spawned as soon as Ethernet or Wi-Fi interface goes
+up.
+
+2) Copy rc.d/zerodns-sta to /usr/local/etc/rc.d and write the
+following in /etc/rc.conf:
+
+zerodns_enable="YES"
+zerodns_iface="<iface_name>"
+
+With this option ZeroDNS will be launched once at startup.
