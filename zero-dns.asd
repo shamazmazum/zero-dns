@@ -31,3 +31,9 @@
   :build-pathname "zero-dns"
   :entry-point "zero-dns:main"
   :depends-on (:zero-dns))
+
+#+sb-core-compression
+(defmethod asdf:perform ((o asdf:image-op) (c asdf:system))
+  (uiop:dump-image (asdf:output-file o c)
+                   :executable t
+                   :compression t))
