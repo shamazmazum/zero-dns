@@ -11,7 +11,8 @@
                      :test #'string=)))
     (when (or (not iface)
               ;; RUNNING flag is 1 on most platforms
-              (evenp (ip-interface-flags iface)))
+              (evenp (ip-interface-flags iface))
+              (every #'zerop (ip-interface-address iface)))
       (error 'zdns-iface-down
              :iface iface-name))
     iface))
