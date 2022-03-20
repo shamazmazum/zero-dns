@@ -1,4 +1,4 @@
-(in-package :zero-dns)
+(in-package :zero-dns-app)
 
 ;; Startup sanity checks
 
@@ -8,7 +8,7 @@
 
 (esrap:defrule ip-addr (and number #\. number #\. number #\. number)
   (:lambda (list) (cons :ip-addr
-                        (mapcar (lambda (fn) (funcall fn list))
+                        (mapcar (alex:rcurry #'funcall list)
                                 (list #'first #'third #'fifth #'seventh)))))
 
 (esrap:defrule port number
@@ -16,7 +16,7 @@
 
 (esrap:defrule ip-addr-and-port (and ip-addr #\: port)
   (:lambda (list)
-    (mapcar (lambda (fn) (funcall fn list))
+    (mapcar (alex:rcurry #'funcall list)
             (list #'first #'third))))
 
 (defun ip-addr-and-port-p (string)
@@ -25,7 +25,7 @@
       (let ((parsed (esrap:parse 'ip-addr-and-port string)))
         ;; Check that the port is unprivileged
         (and (> (cdr (assoc :port parsed)) 1024)
-             (every (lambda (x) (< x 256))
+             (every (alex:rcurry #'< 256)
                     (cdr (assoc :ip-addr parsed)))))
     (esrap:esrap-parse-error () ())))
 

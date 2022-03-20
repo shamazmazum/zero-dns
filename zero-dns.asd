@@ -11,9 +11,7 @@
                :pzmq
                :cl-store
                :cl-daemonize
-               :bordeaux-threads
-               :unix-opts
-               :esrap)
+               :bordeaux-threads)
   :pathname "src/"
   :serial t
   :components ((:file "package")
@@ -23,14 +21,20 @@
                (:file "bookkeeper-service")
                (:file "sender")
                (:file "receiver")
-               (:file "zero-dns")
-               (:file "standalone")))
+               (:file "zero-dns")))
 
 (defsystem :zero-dns/executable
+  :pathname "app/"
+  :serial t
+  :components ((:file "package")
+               (:file "standalone"))
+  :depends-on (:zero-dns
+               :alexandria
+               :unix-opts
+               :esrap)
   :build-operation program-op
   :build-pathname "zero-dns"
-  :entry-point "zero-dns:main"
-  :depends-on (:zero-dns))
+  :entry-point "zero-dns-app:main")
 
 #+sb-core-compression
 (defmethod asdf:perform ((o asdf:image-op) (c asdf:system))

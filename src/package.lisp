@@ -5,7 +5,8 @@
         #:bordeaux-threads
         #:cl-daemonize)
   (:export #:zero-dns
-           #:main
+           ;; Conditions
+           #:zdns-error
            ;; Parameters
            #:*sending-interval*
            #:*time-to-live*
