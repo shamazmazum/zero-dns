@@ -8,11 +8,22 @@
   :test #'equal
   :documentation "ZMQ quit message for worker threads.")
 
+(alex:define-constant +stop-io-message+ "stop-io"
+  :test #'equal
+  :documentation "ZMQ quit message for I/O threads.")
+
 (defun find-iface (iface-name)
   "Find an interface with name IFACE-NAME"
   (find iface-name (get-ip-interfaces)
         :key  #'ip-interface-name
         :test #'string=))
+
+(defun addr-in-network-p (ip-addr network)
+  (multiple-value-bind (network-addr mask)
+      (sera:deconstruct network)
+    (every #'=
+           (map 'vector #'logand ip-addr mask)
+           (map 'vector #'logand network-addr mask))))
 
 (defun check-iface-running (iface-name)
   "Return interface if it exists and is running, signal an error"

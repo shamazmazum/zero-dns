@@ -6,6 +6,7 @@
   :version "0.1"
   :depends-on (:flexi-streams
                :alexandria
+               :serapeum
                :nibbles
                :ip-interfaces
                :pzmq

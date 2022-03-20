@@ -12,6 +12,11 @@
       (close stream))
     (delete-file tmpname)))
 
+(defun start-io (iface)
+  (list
+   (start-sender   iface)
+   (start-receiver iface)))
+
 (defun zero-dns (iface &key daemonize)
   "Start ZeroDNS service.on interface IFACE. If DAEMONIZE is T
 daemonize the process."
@@ -22,14 +27,12 @@ daemonize the process."
   (pzmq:with-context (ctx :max-sockets 32)
     (pzmq:with-socket control-socket :pub
       (pzmq:bind control-socket "inproc://control")
-      (let ((threads
-             (mapcar (alex:rcurry #'funcall iface)
-                     (list #'start-bookkeeper
-                           #'start-sender
-                           #'start-receiver))))
+      (let ((bookkeeper-thread (start-bookkeeper iface))
+            io-threads)
         (labels ((stop ()
                    (pzmq:send control-socket +quit-message+)
-                   (map nil #'join-thread threads))
+                   (map nil #'join-thread
+                        (cons bookkeeper-thread io-threads)))
                  (stop-handler (signal info ctx)
                    (declare (ignore signal info ctx))
                    (stop)))
@@ -41,9 +44,22 @@ daemonize the process."
           ;; STOP, to do cleanup.
           (handler-case
               (loop
-                 (when (notany #'thread-alive-p threads)
-                   (return))
                  (sleep 1)
-                 (check-iface-running iface))
+                 (let ((iface (check-iface-running iface)))
+                   (cond
+                     ;; All threads were stopped, exit loop
+                     ((notany #'thread-alive-p
+                               (cons bookkeeper-thread io-threads))
+                      (return))
+                     ;; Start I/O threads if in the home network
+                     ((or (null *network*)
+                          (addr-in-network-p (ip-interface-address iface) *network*))
+                      (when (not io-threads)
+                        (setq io-threads (start-io (ip-interface-name iface)))))
+                     (t
+                      ;; We are not in the home network, stop I/O threads
+                      (when io-threads
+                        (pzmq:send control-socket +stop-io-message+)
+                        (setq io-threads nil))))))
             ((or sb-sys:interactive-interrupt zdns-iface-down) ()
               (stop))))))))

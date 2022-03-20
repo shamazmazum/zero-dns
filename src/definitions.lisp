@@ -1,5 +1,14 @@
 (in-package :zero-dns)
 
+(sera:defconstructor network
+  (ip-addr (simple-vector 4))
+  (mask    (simple-vector 4)))
+
+(defparameter *network* nil
+  "Home network. ZeroDNS will do I/O only if IP address of working
+interface belongs to this network. Default value is NIL which means
+I/O activity in all networks.")
+
 (defparameter *sending-interval* 30
   "Interval between two ZeroDNS messages in seconds.")
 

@@ -17,7 +17,8 @@
                   ;; Check messages from control
                   (when (member :pollin (pzmq:revents items 0))
                     (let ((msg (pzmq:recv-string control-socket)))
-                      (if (string= msg +quit-message+)
+                      (if (or (string= msg +quit-message+)
+                              (string= msg +stop-io-message+))
                           (return nil))))
                   ;; Received Zero DNS message
                   (when (member :pollin (pzmq:revents items 1))

@@ -15,7 +15,8 @@
                     (pzmq:poll items 500)
                     (when (member :pollin (pzmq:revents items 0))
                       (let ((msg (pzmq:recv-string control-socket)))
-                        (if (string= msg +quit-message+)
+                        (if (or (string= msg +quit-message+)
+                                (string= msg +stop-io-message+))
                             (return nil)))))
                   ;; Send multicast message which contains our
                   ;; hostname and IP address if needed.
