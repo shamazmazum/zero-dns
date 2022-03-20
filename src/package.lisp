@@ -4,6 +4,7 @@
         #:ip-interfaces
         #:bordeaux-threads
         #:cl-daemonize)
+  (:local-nicknames (:alex :alexandria))
   (:export #:zero-dns
            ;; Conditions
            #:zdns-error

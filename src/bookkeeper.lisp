@@ -61,6 +61,6 @@
   (declare (type string addr))
   (let ((entry (find addr (bookkeeper-entries bookkeeper)
                      :test #'equalp
-                     :key  (alexandria:compose #'format-ip-address
-                                               #'dns-entry-ip-addr))))
+                     :key  (alex:compose #'format-ip-address
+                                         #'dns-entry-ip-addr))))
     (if entry (dns-entry-hostname entry))))

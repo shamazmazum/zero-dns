@@ -4,15 +4,23 @@
 (defconstant +header+ #x62444e53
   "String 'bDNS'")
 
+(alex:define-constant +quit-message+ "quit"
+  :test #'equal
+  :documentation "ZMQ quit message for worker threads.")
+
+(defun find-iface (iface-name)
+  "Find an interface with name IFACE-NAME"
+  (find iface-name (get-ip-interfaces)
+        :key  #'ip-interface-name
+        :test #'string=))
+
 (defun check-iface-running (iface-name)
   "Return interface if it exists and is running, signal an error"
-  (let ((iface (find iface-name (get-ip-interfaces)
-                     :key #'ip-interface-name
-                     :test #'string=)))
+  (let ((iface (find-iface iface-name)))
     (when (or (not iface)
+              (not (ip-interface-address iface))
               ;; RUNNING flag is 1 on most platforms
-              (evenp (ip-interface-flags iface))
-              (every #'zerop (ip-interface-address iface)))
+              (evenp (ip-interface-flags iface)))
       (error 'zdns-iface-down
              :iface iface-name))
     iface))

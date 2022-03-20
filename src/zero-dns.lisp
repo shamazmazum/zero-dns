@@ -23,13 +23,12 @@ daemonize the process."
     (pzmq:with-socket control-socket :pub
       (pzmq:bind control-socket "inproc://control")
       (let ((threads
-             (flet ((start-service (start-function)
-                      (funcall start-function iface)))
-               (mapcar #'start-service (list #'start-bookkeeper
-                                             #'start-sender
-                                             #'start-receiver)))))
+             (mapcar (alex:rcurry #'funcall iface)
+                     (list #'start-bookkeeper
+                           #'start-sender
+                           #'start-receiver))))
         (labels ((stop ()
-                   (pzmq:send control-socket "quit")
+                   (pzmq:send control-socket +quit-message+)
                    (map nil #'join-thread threads))
                  (stop-handler (signal info ctx)
                    (declare (ignore signal info ctx))
@@ -42,9 +41,9 @@ daemonize the process."
           ;; STOP, to do cleanup.
           (handler-case
               (loop
-                 while (some #'thread-alive-p threads)
-                 do
-                   (sleep 1)
-                   (check-iface-running iface))
+                 (when (notany #'thread-alive-p threads)
+                   (return))
+                 (sleep 1)
+                 (check-iface-running iface))
             ((or sb-sys:interactive-interrupt zdns-iface-down) ()
               (stop))))))))

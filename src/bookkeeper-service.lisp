@@ -47,7 +47,7 @@
                     ;; Check messages from control
                     (when (member :pollin (pzmq:revents items 0))
                       (let ((msg (pzmq:recv-string control-socket)))
-                        (if (string= msg "quit")
+                        (if (string= msg +quit-message+)
                             (return nil))))
                     ;; New Zero DNS entry
                     (when (member :pollin (pzmq:revents items 1))
@@ -60,11 +60,8 @@
                       (answer-query bookkeeper query-socket))
                     ;; Prune old entries
                     (prune-entries bookkeeper)))))))
-    (prog1
-        (make-thread #'bookkeeper-fun
-                     :name "Bookkeeper thread"
-                     :initial-bindings (acons 'pzmq:*default-context*
-                                              pzmq:*default-context*
-                                              *default-special-bindings*))
-      ;; Wait for bookkeeper thread to start
-      (sleep 1))))
+    (make-thread #'bookkeeper-fun
+                 :name "Bookkeeper thread"
+                 :initial-bindings (acons 'pzmq:*default-context*
+                                          pzmq:*default-context*
+                                          *default-special-bindings*))))
