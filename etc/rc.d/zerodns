@@ -17,10 +17,11 @@ required_modules="pty"
 load_rc_config ${name}
 load_rc_config network
 
+: ${zerodns_network="any"}
 : ${zerodns_user="zerodns"}
 : ${zerodns_group="zerodns"}
 
 command="/usr/local/bin/zero-dns"
-command_args="-d ${ifn}"
+command_args="-n ${zerodns_network} -d ${ifn}"
 
 run_rc_command "$1"

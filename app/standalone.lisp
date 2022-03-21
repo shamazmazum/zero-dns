@@ -41,27 +41,29 @@ is given"))
     (cons (first list)
           (third list))))
 
-(esrap:defrule network (and ip-addr #\/ mask)
+(esrap:defrule network (or (and ip-addr #\/ mask) "any")
   (:lambda (list)
-    (cons (first list)
-          (third list))))
+    (when (listp list)
+      (cons (first list)
+            (third list)))))
 
 (defun format-address (address)
   (format nil "~{~d~^.~}:~d"
           (car address)
           (cdr address)))
 
-(defun args=>network (parsed-args)
-  (destructuring-bind (ip-addr . mask) parsed-args
-    (let ((mask (logand
-                 (1- (ash 1 32))
-                 (lognot (1- (ash 1 (- 32 mask)))))))
-      (network (apply #'vector ip-addr)
-               (apply #'vector
-                      (mapcar
-                       (lambda (pos)
-                         (ldb (byte 8 pos) mask))
-                       '(24 16 8 0)))))))
+(defun args->network (parsed-args)
+  (when parsed-args
+    (destructuring-bind (ip-addr . mask) parsed-args
+      (let ((mask (logand
+                   (1- (ash 1 32))
+                   (lognot (1- (ash 1 (- 32 mask)))))))
+        (network (apply #'vector ip-addr)
+                 (apply #'vector
+                        (mapcar
+                         (lambda (pos)
+                           (ldb (byte 8 pos) mask))
+                         '(24 16 8 0))))))))
 
 ;; Command line arguments parsing
 (defmacro documentation-with-default (symbol)
@@ -81,7 +83,7 @@ is given"))
    :description (documentation-with-default *network*)
    :short       #\n
    :long        "network"
-   :arg-parser  (alex:compose #'args=>network
+   :arg-parser  (alex:compose #'args->network
                               (alex:curry #'esrap:parse 'network))
    :meta-var    "NETWORK")
   (:name        :sending-interval
