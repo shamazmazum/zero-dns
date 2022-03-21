@@ -1,5 +1,13 @@
 (in-package :zero-dns-app)
 
+(define-condition no-interface (error) ()
+  (:report
+   (lambda (c s)
+     (declare (ignore c))
+     (format s "You must specify a network interface for ZeroDNS to work with.")))
+  (:documentation "Signalled when wrong number of mandatory arguments
+is given"))
+
 ;; Startup sanity checks
 
 ;; Rules to parse IP address and port
@@ -7,27 +15,53 @@
   (:lambda (list) (parse-integer (esrap:text list))))
 
 (esrap:defrule ip-addr (and number #\. number #\. number #\. number)
-  (:lambda (list) (cons :ip-addr
-                        (mapcar (alex:rcurry #'funcall list)
-                                (list #'first #'third #'fifth #'seventh)))))
+  (:lambda (list)
+    (let ((ip-addr (mapcar (alex:rcurry #'funcall list)
+                           (list #'first #'third #'fifth #'seventh))))
+      (when (notevery (alex:rcurry #'< 256) ip-addr)
+        (error "Wrong IP address: ~a" ip-addr))
+      ip-addr)))
 
 (esrap:defrule port number
-  (:lambda (port) (cons :port port)))
+  (:lambda (port)
+    ;; Check that the port is unprivileged
+    (when (< port 1024)
+      (error "Please specify an unprivileged port: ~d" port))
+    port))
+
+(esrap:defrule mask number
+  (:lambda (mask)
+    ;; Check that MASK is really a network mask
+    (when (> mask 32)
+      (error "Please specify a correct network mask: ~d" mask))
+    mask))
 
 (esrap:defrule ip-addr-and-port (and ip-addr #\: port)
   (:lambda (list)
-    (mapcar (alex:rcurry #'funcall list)
-            (list #'first #'third))))
+    (cons (first list)
+          (third list))))
 
-(defun ip-addr-and-port-p (string)
-  "Check if given string is a combination of IPv4 address and port."
-  (handler-case
-      (let ((parsed (esrap:parse 'ip-addr-and-port string)))
-        ;; Check that the port is unprivileged
-        (and (> (cdr (assoc :port parsed)) 1024)
-             (every (alex:rcurry #'< 256)
-                    (cdr (assoc :ip-addr parsed)))))
-    (esrap:esrap-parse-error () ())))
+(esrap:defrule network (and ip-addr #\/ mask)
+  (:lambda (list)
+    (cons (first list)
+          (third list))))
+
+(defun format-address (address)
+  (format nil "~{~d~^.~}:~d"
+          (car address)
+          (cdr address)))
+
+(defun args=>network (parsed-args)
+  (destructuring-bind (ip-addr . mask) parsed-args
+    (let ((mask (logand
+                 (1- (ash 1 32))
+                 (lognot (1- (ash 1 (- 32 mask)))))))
+      (network (apply #'vector ip-addr)
+               (apply #'vector
+                      (mapcar
+                       (lambda (pos)
+                         (ldb (byte 8 pos) mask))
+                       '(24 16 8 0)))))))
 
 ;; Command line arguments parsing
 (defmacro documentation-with-default (symbol)
@@ -40,8 +74,16 @@
    :description (documentation-with-default *multicast-address*)
    :short       #\a
    :long        "address"
-   :arg-parser  #'identity
+   :arg-parser  (alex:compose #'format-address
+                              (alex:curry #'esrap:parse 'ip-addr-and-port))
    :meta-var    "ADDRESS")
+  (:name        :network
+   :description (documentation-with-default *network*)
+   :short       #\n
+   :long        "network"
+   :arg-parser  (alex:compose #'args=>network
+                              (alex:curry #'esrap:parse 'network))
+   :meta-var    "NETWORK")
   (:name        :sending-interval
    :description (documentation-with-default *sending-interval*)
    :short       #\i
@@ -86,24 +128,21 @@
     (let ((sending-interval  (getf options :sending-interval *sending-interval*))
           (time-to-live      (getf options :time-to-live     *time-to-live*))
           (multicast-address (getf options :address          *multicast-address*))
+          (network           (getf options :network          *network*))
           (socket-directory  (getf options :socket-directory *socket-directory*))
           (help              (getf options :help))
           (daemonize         (getf options :daemonize)))
 
-      (if help (describe-and-quit :force-describe t))
+      (when help
+        (describe-and-quit :force-describe t))
 
-      (if (/= (length arguments) 1)
-          (error 'zdns-simple-error
-                 :format-control "You must specify a network interface for ZeroDNS to run on."))
-
-      (if (not (ip-addr-and-port-p multicast-address))
-          (error 'zdns-simple-error
-                 :format-control "Not valid address and port: ~a"
-                 :format-arguments (list multicast-address)))
+      (when (/= (length arguments) 1)
+        (error 'no-interface))
 
       (setq *sending-interval*  sending-interval
             *time-to-live*      time-to-live
             *multicast-address* multicast-address
+            *network*           network
             *socket-directory*  socket-directory)
       (values
        (first arguments)
@@ -111,7 +150,7 @@
 
 (defun main ()
   (handler-bind
-      (((or zdns-error
+      (((or no-interface
             opts:troublesome-option
             sb-int::file-error)
          (lambda (c) (describe-and-quit :condition c))))
