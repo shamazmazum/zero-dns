@@ -45,13 +45,18 @@ only IPv4 is supported.
 `zero-dns` executable supports the following options:
 
 * `-a, --address ADDRESS` Multicast address and port for Zero DNS
-  messages. Default value: `239.192.20.1:5354`
+  messages. Default value: `239.192.20.1:5354`.
+* `-n, --network NETWORK` Working network. Can be a network in CIDR notation or
+  `any`. If the working network is specified ZeroDNS will do I/O on the
+  interface only if the interface has an IP address belonging to that
+  network. If this option is not specified or the working network is `any`
+  ZeroDNS will always send/receive DNS messages on the interface.
 * `-i, --sending-interval SECONDS` Interval between two ZeroDNS messages in
-  seconds. Default value: `30`
+  seconds. Default value: `30`.
 * `-t, --time-to-live SECONDS` Time before ZeroDNS entry expiration in
-  seconds. Default: `120`
+  seconds. Default: `120`.
 * `-q, --socket-directory DIRECTORY` Path to a directory where UNIX domain
-  sockets for DNS queries will be created. Default value: `/var/run/zero-dns/`
+  sockets for DNS queries will be created. Default value: `/var/run/zero-dns/`.
 * `-d, --daemonize` Run as a daemon.
 * `-h, --help` Print help and exit.
 
