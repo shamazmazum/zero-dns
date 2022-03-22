@@ -13,7 +13,7 @@ Quick start:
 * Clone this repository into `local-projects`.
 * Run `(ql:quickload :zero-dns)` in REPL.
 * Run `(asdf:make :zero-dns/executable)`. This step will build an executable
-  file in `local-projects/zero-dns` directory.
+  file in `local-projects/app/zero-dns` directory.
 * Allow incoming and outgoing UDP traffic to `239.192.20.1:5354` destination
   address.
 * DNS queries will be accepted on `/var/run/zero-dns/<iface_name>` UNIX domain
