@@ -37,11 +37,11 @@ daemonize the process."
                    (declare (ignore signal info ctx))
                    (stop)))
           (when daemonize
-            (sb-sys:enable-interrupt sb-posix:sigterm #'stop-handler)
-            (sb-sys:enable-interrupt sb-posix:sigint  #'stop-handler))
-          ;; SB-SYS:INTERACTIVE-INTERRUPT can be signalled only when
-          ;; we are not daemonized. Just call the same function,
-          ;; STOP, to do cleanup.
+            (sb-sys:enable-interrupt sb-posix:sigterm #'stop-handler))
+          ;; I handled SB-SYS:INTERACTIVE-INTERRUPT earlier to
+          ;; gracefully quit when C-c is pressed in the REPL. This
+          ;; does not work in SLIME though, so handle only
+          ;; ZDNS-IFACE-DOWN. REPL is used only for debugging anyway.
           (handler-case
               (loop
                  (sleep 1)
@@ -61,5 +61,5 @@ daemonize the process."
                       (when io-threads
                         (pzmq:send control-socket +stop-io-message+)
                         (setq io-threads nil))))))
-            ((or sb-sys:interactive-interrupt zdns-iface-down) ()
+            (zdns-iface-down ()
               (stop))))))))
