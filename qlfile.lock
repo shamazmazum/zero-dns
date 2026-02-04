@@ -1,0 +1,48 @@
+("quicklisp" .
+ (:class qlot/source/dist:source-dist
+  :initargs (:distribution "https://beta.quicklisp.org/dist/quicklisp.txt" :%version :latest)
+  :version "2026-01-01"))
+("flexi-streams" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version :latest)
+  :version "ql-2024-10-12"))
+("alexandria" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version :latest)
+  :version "ql-2024-10-12"))
+("serapeum" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version :latest)
+  :version "ql-2026-01-01"))
+("nibbles" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version :latest)
+  :version "ql-2025-06-22"))
+("pzmq" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version :latest)
+  :version "ql-2021-05-31"))
+("cl-store" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version :latest)
+  :version "ql-2023-02-14"))
+("cl-daemonize" .
+ (:class qlot/source/github:source-github
+  :initargs (:repos "shamazmazum/cl-daemonize" :ref nil :branch nil :tag nil)
+  :version "github-374a4c3af9e5ac20b106b0b78a71112a08a1aaf2"))
+("bordeaux-threads" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version :latest)
+  :version "ql-2024-10-12"))
+("unix-opts" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version :latest)
+  :version "ql-2021-01-24"))
+("esrap" .
+ (:class qlot/source/ql:source-ql
+  :initargs (:%version :latest)
+  :version "ql-2026-01-01"))
+("ip-interfaces" .
+ (:class qlot/source/github:source-github
+  :initargs (:repos "elliottslaughter/ip-interfaces" :ref nil :branch nil :tag nil)
+  :version "github-da1a32c294619436ebe0cd93aa92442b4029c79b"))

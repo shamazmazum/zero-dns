@@ -5,18 +5,12 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      LISP: sbcl
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install dependencies
+      - name: Install roswell
         run: |
-          sudo apt-get install info install-info libzmq3-dev
-      - name: Install CIM
-        run: |
-          curl -L https://raw.githubusercontent.com/shamazmazum/cl-cirrus/github-actions/install-actions.sh | sh
-          cl -e '(ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)'
+          curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh
       - name: Build ZeroDNS
         run: |
-          cl -l zero-dns -e '(uiop:quit 0)'
+          ros -s zero-dns -e '(uiop:quit 0)'

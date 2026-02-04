@@ -1,5 +1,5 @@
-(defsystem :zero-dns
-  :name :zero-dns
+(defsystem :zero-dns/core
+  :name :zero-dns/core
   :description "Simple DNS service on top of ZeroMQ"
   :author "Vasily Postnicov <shamaz.mazum@gmail.com>"
   :license "2-clause BSD"
@@ -13,7 +13,7 @@
                :cl-store
                :cl-daemonize
                :bordeaux-threads)
-  :pathname "src/"
+  :pathname "src"
   :serial t
   :components ((:file "package")
                (:file "definitions")
@@ -24,12 +24,12 @@
                (:file "receiver")
                (:file "zero-dns")))
 
-(defsystem :zero-dns/executable
-  :pathname "app/"
+(defsystem :zero-dns
+  :pathname "app"
   :serial t
   :components ((:file "package")
                (:file "standalone"))
-  :depends-on (:zero-dns
+  :depends-on (:zero-dns/core
                :alexandria
                :unix-opts
                :esrap)
