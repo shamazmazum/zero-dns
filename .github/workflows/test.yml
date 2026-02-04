@@ -8,6 +8,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get install info install-info libzmq3-dev
+      - name: Checkout cl-daemonize
+        uses: actions/checkout@v2
+        with:
+          repository: shamazmazum/cl-daemonize
+          path: ~/lisp/cl-daemonize
       - name: Install roswell
         run: |
           curl -L https://raw.githubusercontent.com/roswell/roswell/master/scripts/install-for-ci.sh | sh
